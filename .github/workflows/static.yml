@@ -1,20 +1,25 @@
 name: Deploy static content to GitHub Pages
 
 on:
+  # Запускать при пуше в ветку main
   push:
     branches: ["main"]
+  # Возможность запуска workflow вручную
   workflow_dispatch:
 
+# Разрешения для учетной записи GITHUB_TOKEN
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Разрешить только одно параллельное развертывание
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
+  # Один job для сборки и деплоя
   deploy:
     environment:
       name: github-pages
@@ -23,27 +28,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-          
-      - name: Install dependencies
-        run: npm install
-        
-      - name: Build project
-        run: npm run build
-        
       - name: Setup Pages
         uses: actions/configure-pages@v3
-        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: './build'
-          
+          # Путь к директории, которую вы хотите опубликовать
+          path: './dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
