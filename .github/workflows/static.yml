@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -23,26 +23,52 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        
-      - name: Setup Node.js
+
+      # --- НАЧАЛО: Добавьте шаги сборки здесь ---
+
+      # Пример 1: Если у вас проект на Node.js (React, Vue, Angular, etc.)
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          
+          node-version: '18' # Укажите нужную версию Node.js
+          cache: 'npm' # Или 'yarn', если используете Yarn
       - name: Install dependencies
-        run: npm ci || npm install
-        
+        run: npm install # Или 'yarn install'
       - name: Build project
-        run: npm run build
-        
+        run: npm run build # Или 'yarn build', или другая ваша команда сборки
+
+      # Пример 2: Если у вас проект на Jekyll
+      # - name: Setup Ruby
+      #   uses: ruby/setup-ruby@v1
+      #   with:
+      #     ruby-version: '3.0' # Укажите нужную версию Ruby
+      #     bundler-cache: true # Кэширование гемов для ускорения
+      # - name: Build with Jekyll
+      #   run: bundle exec jekyll build --lsi # Команда сборки Jekyll
+
+      # Пример 3: Если у вас проект на Hugo
+      # - name: Setup Hugo
+      #   uses: peaceiris/actions-hugo@v2
+      #   with:
+      #     hugo-version: 'latest' # Или конкретная версия Hugo
+      # - name: Build with Hugo
+      #   run: hugo --minify # Команда сборки Hugo
+
+      # --- КОНЕЦ: Шаги сборки ---
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
-        
-      - name: Upload Pages artifact
+        # ВАЖНО: configure-pages НЕ выполняет сборку, только подготавливает окружение
+
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: './build'
-          
+          # Путь к директории, СОЗДАННОЙ на шаге сборки
+          # Убедитесь, что этот путь соответствует тому, куда ваш build-скрипт помещает результат
+          path: './build' # Для Node.js проектов это часто 'build' или 'dist'
+                         # Для Jekyll это часто '_site'
+                         # Для Hugo это часто 'public'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v1
